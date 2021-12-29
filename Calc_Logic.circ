@@ -60,7 +60,7 @@
     <a name="appearance" val="logisim_evolution"/>
     <a name="circuit" val="main"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
-    <a name="simulationFrequency" val="2048000.0"/>
+    <a name="simulationFrequency" val="4.0"/>
     <comp lib="0" loc="(1030,1270)" name="Splitter">
       <a name="appear" val="center"/>
       <a name="bit0" val="6"/>
@@ -2386,6 +2386,7 @@
     <comp lib="0" loc="(440,510)" name="Bit Extender">
       <a name="in_width" val="4"/>
       <a name="out_width" val="32"/>
+      <a name="type" val="zero"/>
     </comp>
     <comp lib="0" loc="(970,730)" name="Splitter">
       <a name="facing" val="west"/>
@@ -3553,13 +3554,16 @@
       <a name="label" val="equals_out"/>
       <a name="output" val="true"/>
     </comp>
+    <comp lib="1" loc="(390,50)" name="AND Gate"/>
+    <comp lib="4" loc="(240,20)" name="D Flip-Flop">
+      <a name="appearance" val="logisim_evolution"/>
+    </comp>
     <comp loc="(400,120)" name="button_processor"/>
     <comp loc="(400,190)" name="button_processor"/>
     <comp loc="(400,260)" name="button_processor"/>
     <comp loc="(400,330)" name="button_processor"/>
     <comp loc="(400,400)" name="button_processor"/>
     <comp loc="(400,470)" name="button_processor"/>
-    <comp loc="(400,50)" name="button_processor"/>
     <comp loc="(400,540)" name="button_processor"/>
     <wire from="(130,120)" to="(180,120)"/>
     <wire from="(130,190)" to="(180,190)"/>
@@ -3585,14 +3589,22 @@
     <wire from="(150,490)" to="(180,490)"/>
     <wire from="(150,560)" to="(180,560)"/>
     <wire from="(150,70)" to="(150,140)"/>
-    <wire from="(150,70)" to="(180,70)"/>
+    <wire from="(150,70)" to="(230,70)"/>
+    <wire from="(180,30)" to="(180,50)"/>
+    <wire from="(180,30)" to="(210,30)"/>
+    <wire from="(210,10)" to="(210,30)"/>
+    <wire from="(210,10)" to="(330,10)"/>
+    <wire from="(210,30)" to="(230,30)"/>
+    <wire from="(290,70)" to="(340,70)"/>
+    <wire from="(330,10)" to="(330,30)"/>
+    <wire from="(330,30)" to="(340,30)"/>
+    <wire from="(390,50)" to="(460,50)"/>
     <wire from="(400,120)" to="(460,120)"/>
     <wire from="(400,190)" to="(460,190)"/>
     <wire from="(400,260)" to="(460,260)"/>
     <wire from="(400,330)" to="(460,330)"/>
     <wire from="(400,400)" to="(460,400)"/>
     <wire from="(400,470)" to="(460,470)"/>
-    <wire from="(400,50)" to="(460,50)"/>
     <wire from="(400,540)" to="(460,540)"/>
   </circuit>
   <circuit name="seven_seg_display">
