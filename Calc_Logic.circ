@@ -60,7 +60,7 @@
     <a name="appearance" val="logisim_evolution"/>
     <a name="circuit" val="main"/>
     <a name="circuitnamedboxfixedsize" val="true"/>
-    <a name="simulationFrequency" val="2048000.0"/>
+    <a name="simulationFrequency" val="1.0"/>
     <comp lib="0" loc="(1030,1270)" name="Splitter">
       <a name="appear" val="center"/>
       <a name="bit0" val="6"/>
@@ -722,10 +722,8 @@
     <wire from="(430,1530)" to="(600,1530)"/>
     <wire from="(430,700)" to="(430,1140)"/>
     <wire from="(430,700)" to="(650,700)"/>
-    <wire from="(440,1120)" to="(440,1210)"/>
-    <wire from="(440,1120)" to="(450,1120)"/>
     <wire from="(440,1210)" to="(470,1210)"/>
-    <wire from="(440,620)" to="(440,1120)"/>
+    <wire from="(440,620)" to="(440,1210)"/>
     <wire from="(450,1220)" to="(450,1270)"/>
     <wire from="(450,1490)" to="(450,1520)"/>
     <wire from="(450,1520)" to="(660,1520)"/>
