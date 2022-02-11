@@ -28,15 +28,9 @@ module calculator(
     input clr,
     input logic [2:0] opcode,
     input logic [9:0] btn,
-    output logic num,
-    output logic op,
-    output logic [3:0] state,
-    output logic [3:0] pressedNum,
-    output logic [31:0] displayedNum,
-    output logic [31:0] val1,
-    output logic [31:0] val2,
-    output logic [2:0] pressedOp,
-    output logic [2:0] prevOp
+    output logic [9:0] an,
+    output [6:0] seg,
+    output logic [31:0] displayedNum
     );
     
     localparam [4:0] s0 = 0,
@@ -47,23 +41,33 @@ module calculator(
                     s5 = 5,
                     s6 = 6,
                     s7 = 7,
-                    s8 = 8;
+                    s8 = 8,
+                    s9 = 9;
                         
-    //reg [3:0] state = s0;
-    //reg [31:0] val1;
-    //reg [31:0] val2;
-    //reg [3:0] pressedNum;
-    //reg [2:0] pressedOp;
-    //reg [2:0] prevOp;
-    //logic op;
-    //logic num; 
+    logic [3:0] state = s0;
+    logic [31:0] val1;
+    logic [31:0] val2;
+    logic [3:0] pressedNum;
+    logic [3:0] desiredDigit;
+    logic [2:0] pressedOp;
+    logic [2:0] prevOp;
+    logic [26:0] counter_100M;
+    logic [13:0] counter_100T;
+    logic [9:0] counter_10;
+    logic counter_en_2;
+    logic negPressed;
+    logic op;
+    logic num; 
     
     initial begin
         val1 = 0;
-        val2 =0;
-        displayedNum =0;
+        val2 = 0;
+        displayedNum = 0;
         state = s0;
+        negPressed = 0;
     end
+    
+    calc_display disp1(.digit(desiredDigit), .neg(negPressed), .seven_seg(seg));
     
     always @ (posedge clk) begin
         if (btn != 0) num = 1;
@@ -82,13 +86,26 @@ module calculator(
             pressedNum = 0;
             pressedOp = 0;
             prevOp = 0;
-            displayedNum =0 ;
+            displayedNum = 0;
+            negPressed = 0;
         end
         else if(state == 3) begin 
             if (num) pressedNum = getNum(btn); 
         end
         else if(state == 4)begin
-            val1 = pressedNum + val1*10;
+            if(negPressed)begin
+                if(val1 == 0)begin
+                    val1 = pressedNum + val1*10;   
+                    val1 = -val1;
+                end
+                else begin
+                    val1 = -val1;
+                    val1 = pressedNum + val1*10;   
+                    val1 = -val1;
+                end        
+            end
+            else val1 = pressedNum + val1*10;
+            
             pressedNum = 0;
             displayedNum = val1;
         end
@@ -97,21 +114,18 @@ module calculator(
             pressedOp = opcode;
         end
         else if(state == 7) begin
-            case(prevOp)
-                0: val2 = val1;
-                1: val2 = val2;
-                2: val2 = val1+val2;
-                3: val2 = val2-val1;
-                4: val2 = val2/val1;
-                5: val2 = val1*val2;
-            endcase
-            //val2= eval(val1, val2, prevOp);
+            val2= eval(val1, val2, prevOp);
             val1 = 0;
             displayedNum = val2;
         end
-        else if(state == 8)begin
-            val1=val1*-1;
-            displayedNum = val1;
+        else if(state == 9)begin
+            if(val1 == 0) negPressed = 1;
+            else if (val1[31] == 1) begin
+                val1 = -val1; 
+                negPressed = 0;
+                displayedNum = val1;
+            end
+            else val1 = -val1; negPressed = 1; displayedNum = val1; 
         end
     end
   
@@ -127,7 +141,7 @@ module calculator(
                     if(clr) state = s1;
                     else if(num)state = s3;
                     else if(op) state = s5;
-                    else if(neg) state = s7;
+                    else if(neg) state = s8;
                     else state = s2;
                 end
                 s3: begin
@@ -138,16 +152,62 @@ module calculator(
                 s5: state = s6;
                 s6: if(!op)state = s7; else state = s6;
                 s7: state = s2;
-                s8: state = s2;
+                s8: if(!neg)state = s9; else state = s8;
+                s9: state = s2;
                 default: state = s0;
             endcase
         end
       end
       
+      always @ (posedge clk)begin
+          if(counter_100T == 100_000) 
+              counter_100T <= 0;
+          else
+              counter_100T <= counter_100T + 1'b1;
+      end
+          
+      always @ (posedge clk)begin
+          if (counter_en_2)
+              if (counter_10 == 9)
+                  counter_10 <= 0;
+          else
+              counter_10 <= counter_10 + 1'b1;
+      end
+                  
+                  
+      //create a signal that is active every 100M clocks
+      assign counter_en_2 = (counter_100T ==0);
+      
+  always @ (posedge counter_en_2)
+        case (counter_10)
+          0: an = 10'b1111111110;
+          1: an = 10'b1111111101;
+          2: an = 10'b1111111011;
+          3: an = 10'b1111110111;
+          4: an = 10'b1111101111;
+          5: an = 10'b1111011111;
+          6: an = 10'b1110111111;
+          7: an = 10'b1101111111;
+          8: an = 10'b1011111111;
+          9: an = 10'b0111111111;
+        endcase
+        
+    always @ (posedge counter_en_2)
+        case (counter_10)
+            0: desiredDigit = displayedNum%10;
+            1: desiredDigit = (displayedNum/10)%10;
+            2: desiredDigit = (displayedNum/100)%10;
+            3: desiredDigit = (displayedNum/1000)%10;
+            4: desiredDigit = (displayedNum/10000)%10;
+            5: desiredDigit = (displayedNum/100000)%10;
+            6: desiredDigit = (displayedNum/1000000)%10;
+            7: desiredDigit = (displayedNum/10000000)%10;
+            8: desiredDigit = (displayedNum/100000000)%10;
+            9: desiredDigit = (displayedNum/1000000000)%10;
+        endcase
 
     
-    function int eval(logic val1, logic val2, logic [2:0] prevOp);
-        $display("function ", val1);
+    function int eval(logic [31:0] val1, logic [31:0] val2, logic [2:0] prevOp);
         case(prevOp)
             3'b000: return val1;
             3'b001: return val2;
