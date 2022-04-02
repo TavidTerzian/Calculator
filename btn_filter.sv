@@ -26,11 +26,14 @@ module btn_filter(
     output logic sig
     );
     
-    logic q1, q2;
+    logic q1;
+    logic q2;
+    logic q2_bar;
     
     always @ (posedge clk)begin
         q1 <= btn;
         q2 <= q1;
-        if(q2) sig =(btn && !q2);
+        q2_bar <= !q2;
+        sig <= (btn && q2_bar);
     end
 endmodule
