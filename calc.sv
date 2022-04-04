@@ -24,7 +24,7 @@ module calc(
     input clk,
     input [4:0] opcode,
     input [9:0] btn,
-    input neg,
+    //input neg,
     input clr,
     output [3:0] an,
     output [6:0] seg
@@ -37,15 +37,15 @@ module calc(
     logic [9:0] val1 = 0;
     logic [9:0] val2 = 0;
     logic [9:0] displayedNum = 0;
-    //logic [2:0] pressedOp = 0;
-    //logic [2:0] prevOp = 0;
+    logic [2:0] pressedOp = 0;
+    logic [2:0] prevOp = 0;
     //logic negPressed;
-    //logic op;
+    logic op_en;
     logic num; 
-    logic num_en;
+    //logic num_en;
     
     
-    wire num_filter_output;
+    //logic num_filter_output;
     //logic op_filter_output;
     //logic neg_filter_output;
     //logic clr_filter_output;
@@ -53,37 +53,39 @@ module calc(
    
     bin_num_display disp(.btn(displayedNum), .clk(clk), .an(an), .seg(seg));
     
-    btn_filter b (.btn(num), .clk(clk), .sig(num_filter_ouput));
+    //btn_filter b (.btn(num), .clk(clk), .sig(num_filter_ouput));
     //btn_filter o (.btn(op), .clk(clk), .sig(op_filter_output));
     //btn_filter n (.btn(neg), .clk(clk), .sig(neg_filter_output));
     //btn_filter c (.btn(clr), .clk(clk), .sig(clr_filter_output));
-    /*
-    always @ (clr_filter_output)begin
-        val1 <= 0;
+/*
+    always @ (clr)begin
+        val1 <= btn;
         val2 <= 0;
-        negPressed <= 0;
-        displayedNum <= 0;
+        //negPressed <= 0;
+        displayedNum <= btn;
         state <= s0;
     end
-    */
-    
-    assign  num_en = num_filter_output;
- 
-    always @ (posedge clk)begin
+ */
+    always @ (btn)begin
         if(btn!=val1) num<=1;
         else num <=0;
+    end
+    
+    always @ (opcode)begin
+        if(opcode != 0) op_en <= 1;
+        else op_en <= 0;
     end
     
     always @ (posedge clk)begin
         case(state) 
             s0:begin
-                if(num_en) state<=s1;
-                //else if (op_filter_output) state<=s2;
+                if(num) state<=s1;
+                else if (op_en) state<=s2;
                 //else if (neg_filter_output) state<=s3;
                 else state <= s0;
             end
             s1:state<=s0;
-            //s2:state<=s0;
+            s2:state<=s0;
             //s3:state<=s0;
         endcase
     end
@@ -94,23 +96,25 @@ module calc(
                 val1 <= btn;
                 displayedNum <= btn;
             end
-            /*s2:begin
-                prevOp = pressedOp;
+            2:begin
+                prevOp <= pressedOp;
                 pressedOp <= opcode;
-            end*/
+                if(prevOp == 0) val2 <= val1;
+                else val2 <= eval(val1, val2, prevOp);
+                displayedNum <= val2;
+            end
         endcase
     end
-/*    
+    
     function int eval(logic [9:0] val1, logic [9:0] val2, logic [2:0] prevOp);
         case(prevOp)
-            3'b000: return val1;
-            3'b001: return val2;
-            3'b010: return val1+val2;
-            3'b011: return val1-val2;
-            3'b100: return val2/val1;
-            3'b101: return val1*val2;
+            3'b000: return val2;
+            3'b001: return val1+val2;
+            3'b010: return val1-val2;
+            3'b011: return val2/val1;
+            3'b100: return val1*val2;
             default: return 0;
         endcase
     endfunction
-        */
+        
 endmodule
