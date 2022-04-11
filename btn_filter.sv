@@ -23,17 +23,27 @@
 module btn_filter(
     input btn,
     input clk,
-    output logic sig
+    output sig
+    );
+    wire q_bar;
+    
+    d_ff d0(.clk(clk), .d(btn), .q(q0));
+    d_ff d1(.clk(clk), .d(q0), .q(q1));
+    d_ff d2(.clk(clk), .d(q1), .q(q2));
+    
+    assign q_bar = ~q2;
+    assign sig = (q1 && q_bar);    
+
+endmodule
+
+module d_ff(
+    input clk,
+    input d,
+    output reg q
     );
     
-    logic q1;
-    logic q2;
-    logic q2_bar;
-    
     always @ (posedge clk)begin
-        q1 <= btn;
-        q2 <= q1;
-        q2_bar <= !q2;
-        sig <= (btn && q2_bar);
+        q <= d;
     end
+
 endmodule
